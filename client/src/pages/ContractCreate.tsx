@@ -36,27 +36,27 @@ function ContractCreate() {
     contractNumber: '',
     customerId: '',
     mandantId: '',
-    contractGroupId: undefined,
+    contractGroupId: '',
     currencyId: '',
     status: 0 as ContractStatus,
-    type: 0 as ContractType,
+    contractType: 0 as ContractType,
     startDate: new Date().toISOString().split('T')[0],
     endDate: undefined,
     isUnlimited: true,
-    terminationNoticePeriod: 3,
-    description: '',
+    noticePeriodMonths: 3,
+    noticeDeadline: undefined,
+    autoRenew: false,
+    billingStartDate: new Date().toISOString().split('T')[0],
+    responsibleSales: '',
+    responsibleAccounting: '',
+    responsiblePricing: '',
     notes: '',
-    billingCycle: '',
-    sapContractAccount: '',
-    budgetResponsible: '',
-    responsiblePerson: '',
-    contactPerson: '',
   })
 
   // EUR als Standard-Währung setzen
   useEffect(() => {
     if (currencies && currencies.length > 0 && !formData.currencyId) {
-      const eur = currencies.find(c => c.value === 'EUR')
+      const eur = currencies.find(c => c.code === 'EUR')
       if (eur) {
         setFormData(prev => ({ ...prev, currencyId: eur.id }))
       }
@@ -143,13 +143,13 @@ function ContractCreate() {
               <div className="form-group">
                 <label>Typ *</label>
                 <select
-                  value={formData.type}
-                  onChange={(e) => handleChange('type', Number(e.target.value) as ContractType)}
+                  value={formData.contractType}
+                  onChange={(e) => handleChange('contractType', Number(e.target.value) as ContractType)}
                   required
                 >
-                  <option value="0">Strom</option>
-                  <option value="1">Gas</option>
-                  <option value="2">Sonstige</option>
+                  <option value="0">Verkauf</option>
+                  <option value="1">Lieferant</option>
+                  <option value="2">Verkaufschance</option>
                 </select>
               </div>
             </div>
@@ -165,7 +165,7 @@ function ContractCreate() {
                   <option value="">Bitte wählen...</option>
                   {customers?.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.label}
+                      {c.display}
                     </option>
                   ))}
                 </select>
@@ -181,7 +181,7 @@ function ContractCreate() {
                   <option value="">Bitte wählen...</option>
                   {mandants?.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.label}
+                      {m.display}
                     </option>
                   ))}
                 </select>
@@ -198,7 +198,7 @@ function ContractCreate() {
                   <option value="">Keine</option>
                   {contractGroups?.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.label}
+                      {g.display}
                     </option>
                   ))}
                 </select>
@@ -213,22 +213,14 @@ function ContractCreate() {
                 >
                   {currencies?.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.label}
+                      {c.display}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Beschreibung</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                placeholder="Kurze Beschreibung des Vertrags"
-                rows={3}
-              />
-            </div>
+
 
             <div className="form-actions">
               <button type="button" onClick={() => navigate('/contracts')} className="btn">
@@ -288,8 +280,8 @@ function ContractCreate() {
               <label>Kündigungsfrist (Monate) *</label>
               <input
                 type="number"
-                value={formData.terminationNoticePeriod}
-                onChange={(e) => handleChange('terminationNoticePeriod', Number(e.target.value))}
+                value={formData.noticePeriodMonths}
+                onChange={(e) => handleChange('noticePeriodMonths', Number(e.target.value))}
                 min="0"
                 required
               />
@@ -317,52 +309,42 @@ function ContractCreate() {
             <h3>Details & Verantwortliche</h3>
 
             <div className="form-group">
-              <label>Abrechnungszyklus</label>
+              <label>Abrechnungsbeginn *</label>
               <input
-                type="text"
-                value={formData.billingCycle}
-                onChange={(e) => handleChange('billingCycle', e.target.value)}
-                placeholder="z.B. Monatlich, Quartalsweise"
+                type="date"
+                value={formData.billingStartDate}
+                onChange={(e) => handleChange('billingStartDate', e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
-              <label>SAP Vertragskonto</label>
+              <label>Sachbearbeiter Vertrieb</label>
               <input
                 type="text"
-                value={formData.sapContractAccount}
-                onChange={(e) => handleChange('sapContractAccount', e.target.value)}
-                placeholder="SAP Konto-Nummer"
+                value={formData.responsibleSales}
+                onChange={(e) => handleChange('responsibleSales', e.target.value)}
+                placeholder="Name des Sachbearbeiters"
               />
             </div>
 
             <div className="form-group">
-              <label>Budgetverantwortlicher</label>
+              <label>Sachbearbeiter Buchhaltung</label>
               <input
                 type="text"
-                value={formData.budgetResponsible}
-                onChange={(e) => handleChange('budgetResponsible', e.target.value)}
-                placeholder="Name des Budgetverantwortlichen"
+                value={formData.responsibleAccounting}
+                onChange={(e) => handleChange('responsibleAccounting', e.target.value)}
+                placeholder="Name des Sachbearbeiters"
               />
             </div>
 
             <div className="form-group">
-              <label>Vertragsverantwortlicher</label>
+              <label>Sachbearbeiter Preise</label>
               <input
                 type="text"
-                value={formData.responsiblePerson}
-                onChange={(e) => handleChange('responsiblePerson', e.target.value)}
-                placeholder="Name des Vertragsverantwortlichen"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Ansprechpartner</label>
-              <input
-                type="text"
-                value={formData.contactPerson}
-                onChange={(e) => handleChange('contactPerson', e.target.value)}
-                placeholder="Name des Ansprechpartners"
+                value={formData.responsiblePricing}
+                onChange={(e) => handleChange('responsiblePricing', e.target.value)}
+                placeholder="Name des Sachbearbeiters"
               />
             </div>
 

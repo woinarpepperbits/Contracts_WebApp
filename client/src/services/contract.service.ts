@@ -1,5 +1,5 @@
 import { apiClient } from './api.service';
-import {
+import type {
   ContractDto,
   CreateContractDto,
   UpdateContractDto,
