@@ -11,25 +11,32 @@ function ContractCreate() {
   const [step, setStep] = useState(1)
 
   // Lookup-Daten laden
-  const { data: customers } = useQuery({
+  const { data: customers, isLoading: loadingCustomers, error: errorCustomers } = useQuery({
     queryKey: ['customers'],
     queryFn: lookupService.getCustomers,
   })
 
-  const { data: mandants } = useQuery({
+  const { data: mandants, isLoading: loadingMandants } = useQuery({
     queryKey: ['mandants'],
     queryFn: lookupService.getMandants,
   })
 
-  const { data: contractGroups } = useQuery({
+  const { data: contractGroups, isLoading: loadingGroups } = useQuery({
     queryKey: ['contractGroups'],
     queryFn: lookupService.getContractGroups,
   })
 
-  const { data: currencies } = useQuery({
+  const { data: currencies, isLoading: loadingCurrencies } = useQuery({
     queryKey: ['currencies'],
     queryFn: lookupService.getCurrencies,
   })
+
+  // Debug-Log
+  useEffect(() => {
+    console.log('Customers:', customers)
+    console.log('Customers loading:', loadingCustomers)
+    console.log('Customers error:', errorCustomers)
+  }, [customers, loadingCustomers, errorCustomers])
 
   // Formular State
   const [formData, setFormData] = useState<CreateContractDto>({

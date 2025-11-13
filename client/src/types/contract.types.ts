@@ -78,8 +78,11 @@ export interface LookupItem {
   display: string;
 }
 
-export interface CustomerLookup extends LookupItem {
+export interface CustomerLookup {
+  id: string;
   customerNumber: string;
+  name: string;
+  display: string;
 }
 
 export interface ContractStatusLookup {
